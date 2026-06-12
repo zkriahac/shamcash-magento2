@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Background reconciliation poller. Schedule is read from
+ * payment/shamcash/cron_expr (default */5 * * * *).
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Cron:etc/crontab.xsd">
+    <group id="default">
+        <job name="shamcash_reconcile_orders"
+             instance="ShamCash\Payment\Cron\PollTransactions"
+             method="execute">
+            <config_path>payment/shamcash/cron_expr</config_path>
+        </job>
+    </group>
+</config>

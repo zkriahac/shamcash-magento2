@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Dependency injection wiring for the Sham Cash payment gateway.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Service contracts -->
+    <preference for="ShamCash\Payment\Gateway\Http\ClientInterface"
+                type="ShamCash\Payment\Gateway\Http\CurlClient"/>
+    <preference for="ShamCash\Payment\Api\ReconciliationInterface"
+                type="ShamCash\Payment\Model\Reconciliation"/>
+    <preference for="ShamCash\Payment\Api\PaymentInstructionsInterface"
+                type="ShamCash\Payment\Model\PaymentInstructions"/>
+    <preference for="ShamCash\Payment\Api\Data\ReconciliationResultInterface"
+                type="ShamCash\Payment\Model\ReconciliationResult"/>
+    <preference for="ShamCash\Payment\Api\Data\PaymentInstructionsInterface"
+                type="ShamCash\Payment\Model\PaymentInstructionsResult"/>
+
+    <!-- Dedicated log file: var/log/shamcash.log -->
+    <virtualType name="ShamCashLoggerHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/shamcash.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShamCashLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">shamcash</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">ShamCashLoggerHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="ShamCash\Payment\Gateway\ApiClient">
+        <arguments>
+            <argument name="logger" xsi:type="object">ShamCashLogger</argument>
+        </arguments>
+    </type>
+    <type name="ShamCash\Payment\Reconciliation\Matcher">
+        <arguments>
+            <argument name="logger" xsi:type="object">ShamCashLogger</argument>
+        </arguments>
+    </type>
+
+    <!-- Payment method built on the modern gateway adapter -->
+    <virtualType name="ShamCashFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="string">shamcash</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ShamCashValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">ShamCashValidatorPool</argument>
+            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info\Instructions</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="ShamCashGatewayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">ShamCash\Payment\Model\Config::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShamCashConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">ShamCashGatewayConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ShamCashValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">ShamCashConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="ShamCashValidatorPool" type="Magento\Payment\Gateway\Validator\ValidatorPool">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name="availability" xsi:type="string">ShamCash\Payment\Gateway\Validator\CurrencyValidator</item>
+            </argument>
+        </arguments>
+    </virtualType>
+</config>

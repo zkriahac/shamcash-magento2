@@ -1,0 +1,77 @@
+<?php
+/**
+ * @var \ShamCash\Payment\Block\Adminhtml\Order\Info $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+if (!$block->isShamCashOrder()) {
+    return;
+}
+$order = $block->getOrder();
+$transactions = $block->isPaid() ? [] : $block->getRecentTransactions();
+?>
+<section class="admin__page-section shamcash-order-info">
+    <div class="admin__page-section-title">
+        <span class="title"><?= $escaper->escapeHtml(__('Sham Cash')) ?></span>
+    </div>
+
+    <?php if ($block->isPaid()): ?>
+        <p class="message message-success">
+            <?= $escaper->escapeHtml(__('Payment confirmed.')) ?>
+            <?php if ($block->getMatchedTransactionId() !== ''): ?>
+                <?= $escaper->escapeHtml(__('Transaction: %1', $block->getMatchedTransactionId())) ?>
+            <?php endif; ?>
+        </p>
+    <?php else: ?>
+        <p class="message message-notice">
+            <?= $escaper->escapeHtml(__('Awaiting Sham Cash transfer.')) ?>
+        </p>
+        <p>
+            <a class="action-default" href="<?= $escaper->escapeUrl($block->getCheckUrl()) ?>">
+                <?= $escaper->escapeHtml(__('Check now')) ?>
+            </a>
+        </p>
+
+        <?php if ($block->getApiError() !== null): ?>
+            <p class="message message-error">
+                <?= $escaper->escapeHtml(__('Could not load Sham Cash transactions: %1', $block->getApiError())) ?>
+            </p>
+        <?php elseif ($transactions): ?>
+            <p><strong><?= $escaper->escapeHtml(__('Recent transfers — credit one to this order:')) ?></strong></p>
+            <table class="admin__table-primary shamcash-tx-table">
+                <thead>
+                    <tr>
+                        <th><?= $escaper->escapeHtml(__('When')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Amount')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Sender')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Note')) ?></th>
+                        <th><?= $escaper->escapeHtml(__('Transaction')) ?></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php foreach ($transactions as $tx): ?>
+                    <tr>
+                        <td><?= $escaper->escapeHtml((string)$tx->getOccurredAt()) ?></td>
+                        <td><?= $escaper->escapeHtml($tx->getAmount()) ?> <?= $escaper->escapeHtml($tx->getCurrencyCode()) ?></td>
+                        <td><?= $escaper->escapeHtml((string)$tx->getSenderName()) ?></td>
+                        <td><?= $escaper->escapeHtml((string)$tx->getNote()) ?></td>
+                        <td><?= $escaper->escapeHtml($tx->getTransactionId()) ?></td>
+                        <td>
+                            <form action="<?= $escaper->escapeUrl($block->getManualMatchUrl()) ?>" method="post">
+                                <input type="hidden" name="form_key" value="<?= $escaper->escapeHtmlAttr($block->getFormKeyValue()) ?>"/>
+                                <input type="hidden" name="order_id" value="<?= (int)$order->getId() ?>"/>
+                                <input type="hidden" name="transaction_id" value="<?= $escaper->escapeHtmlAttr($tx->getTransactionId()) ?>"/>
+                                <button type="submit" class="action-default">
+                                    <?= $escaper->escapeHtml(__('Credit')) ?>
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+                </tbody>
+            </table>
+        <?php else: ?>
+            <p><?= $escaper->escapeHtml(__('No recent Sham Cash transfers found for this order yet.')) ?></p>
+        <?php endif; ?>
+    <?php endif; ?>
+</section>

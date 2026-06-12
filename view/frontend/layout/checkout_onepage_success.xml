@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Adds Sham Cash payment instructions to the order success page.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceContainer name="content">
+            <block class="ShamCash\Payment\Block\Success\Instructions"
+                   name="shamcash.success.instructions"
+                   before="-"
+                   template="ShamCash_Payment::success/instructions.phtml"/>
+        </referenceContainer>
+    </body>
+</page>

@@ -1,0 +1,21 @@
+{
+    "shamcash_payment_match": {
+        "column": {
+            "match_id": true,
+            "transaction_id": true,
+            "order_id": true,
+            "order_increment_id": true,
+            "amount": true,
+            "currency": true,
+            "matched_by": true,
+            "created_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "SHAMCASH_PAYMENT_MATCH_TRANSACTION_ID": true
+        },
+        "index": {
+            "SHAMCASH_PAYMENT_MATCH_ORDER_ID": true
+        }
+    }
+}

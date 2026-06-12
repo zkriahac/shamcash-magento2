@@ -1,0 +1,37 @@
+name: Unit Tests
+
+on:
+  push:
+    branches: [ "**" ]
+  pull_request:
+
+jobs:
+  phpunit:
+    name: PHPUnit (PHP ${{ matrix.php }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [ "8.2", "8.3" ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mbstring, json, bcmath
+          coverage: none
+          tools: composer
+
+      - name: Lint PHP
+        run: find . -path ./.tools -prune -o -name '*.php' -print0 | xargs -0 -n1 -P4 php -l > /dev/null
+
+      - name: Install PHPUnit
+        run: |
+          mkdir -p .tools
+          cd .tools
+          composer require --no-interaction --quiet "phpunit/phpunit:^11"
+
+      - name: Run unit tests
+        run: ./.tools/vendor/bin/phpunit -c phpunit.xml.dist

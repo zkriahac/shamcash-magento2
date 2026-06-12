@@ -1,0 +1,30 @@
+<?php
+/**
+ * @var \ShamCash\Payment\Block\Adminhtml\System\Config\RefreshButton $block
+ */
+?>
+<?= /* @noEscape */ $block->getButtonHtml() ?? '' ?>
+<script>
+require(['jquery', 'mage/translate'], function ($, $t) {
+    'use strict';
+    $('#shamcash_refresh_account').on('click', function () {
+        var $btn = $(this);
+        $btn.prop('disabled', true);
+        $.ajax({
+            url: '<?= $block->escapeJs($block->getAjaxUrl()) ?>',
+            type: 'GET',
+            dataType: 'json',
+            showLoader: true
+        }).done(function (response) {
+            alert(response && response.message ? response.message : $t('Done.'));
+            if (response && response.success) {
+                location.reload();
+            }
+        }).fail(function () {
+            alert($t('Could not refresh Sham Cash account info.'));
+        }).always(function () {
+            $btn.prop('disabled', false);
+        });
+    });
+});
+</script>

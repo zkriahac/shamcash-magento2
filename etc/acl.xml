@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * ACL resources for Sham Cash configuration and manual reconciliation.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Acl/etc/acl.xsd">
+    <acl>
+        <resources>
+            <resource id="Magento_Backend::admin">
+                <resource id="Magento_Sales::sales">
+                    <resource id="ShamCash_Payment::reconcile" title="Sham Cash: reconcile orders" sortOrder="90"/>
+                </resource>
+                <resource id="Magento_Backend::stores">
+                    <resource id="Magento_Backend::stores_settings">
+                        <resource id="Magento_Config::config">
+                            <resource id="ShamCash_Payment::config" title="Sham Cash payment configuration" sortOrder="90"/>
+                        </resource>
+                    </resource>
+                </resource>
+            </resource>
+        </resources>
+    </acl>
+</config>

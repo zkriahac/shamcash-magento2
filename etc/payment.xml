@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Declares Sham Cash as an offline-style payment method.
+ */
+-->
+<payment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Payment:etc/payment.xsd">
+    <groups>
+        <group id="shamcash">
+            <label>Sham Cash</label>
+        </group>
+    </groups>
+    <methods>
+        <method name="shamcash">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+    </methods>
+</payment>

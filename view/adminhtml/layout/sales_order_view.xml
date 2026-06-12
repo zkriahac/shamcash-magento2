@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Adds the Sham Cash reconciliation panel to the admin order view.
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="order_additional_info">
+            <block class="ShamCash\Payment\Block\Adminhtml\Order\Info"
+                   name="shamcash.order.info"
+                   template="ShamCash_Payment::order/info.phtml"/>
+        </referenceBlock>
+    </body>
+</page>

@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Default configuration for the Sham Cash payment method.
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <shamcash>
+                <active>0</active>
+                <model>ShamCashFacade</model>
+                <title>Sham Cash</title>
+                <order_status>pending_payment</order_status>
+                <api_base_url>https://api.shamcash-api.com/v1</api_base_url>
+                <allowed_currencies>SYP,USD,TRY</allowed_currencies>
+                <matching_mode>both</matching_mode>
+                <amount_tolerance>0</amount_tolerance>
+                <time_window_grace>30</time_window_grace>
+                <order_max_age>1440</order_max_age>
+                <customer_check_rate_limit>30</customer_check_rate_limit>
+                <cron_expr>*/5 * * * *</cron_expr>
+                <coin_map/>
+                <debug>0</debug>
+                <instructions>Please transfer {amount} {currency} from your Sham Cash app to wallet {address} and put the reference {reference} in the transfer note. Your order is confirmed automatically once the payment arrives.</instructions>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>1</can_use_internal>
+                <is_offline>1</is_offline>
+                <sort_order>40</sort_order>
+            </shamcash>
+        </payment>
+    </default>
+</config>

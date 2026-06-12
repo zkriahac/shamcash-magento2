@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Ledger of Sham Cash transactions already claimed by an order. The unique
+ * index on transaction_id is what prevents one transfer being credited to two
+ * orders (idempotent reconciliation).
+ */
+-->
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="shamcash_payment_match" resource="default" engine="innodb"
+           comment="Claimed Sham Cash transactions mapped to Magento orders">
+        <column xsi:type="int" name="match_id" unsigned="true" nullable="false" identity="true"
+                comment="Primary key"/>
+        <column xsi:type="varchar" name="transaction_id" length="128" nullable="false"
+                comment="Sham Cash transaction_id"/>
+        <column xsi:type="int" name="order_id" unsigned="true" nullable="false"
+                comment="sales_order entity id"/>
+        <column xsi:type="varchar" name="order_increment_id" length="50" nullable="true"
+                comment="Order increment id used as the payment reference"/>
+        <column xsi:type="decimal" name="amount" scale="4" precision="20" nullable="true"
+                comment="Matched transfer amount"/>
+        <column xsi:type="varchar" name="currency" length="8" nullable="true"
+                comment="Matched currency code"/>
+        <column xsi:type="varchar" name="matched_by" length="16" nullable="true"
+                comment="note, amount or manual"/>
+        <column xsi:type="timestamp" name="created_at" on_update="false" nullable="false" default="CURRENT_TIMESTAMP"
+                comment="When the match was recorded"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="match_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="SHAMCASH_PAYMENT_MATCH_TRANSACTION_ID">
+            <column name="transaction_id"/>
+        </constraint>
+        <index referenceId="SHAMCASH_PAYMENT_MATCH_ORDER_ID" indexType="btree">
+            <column name="order_id"/>
+        </index>
+    </table>
+</schema>

@@ -1,0 +1,35 @@
+# Sham Cash GraphQL surface for headless / PWA storefronts.
+# Set the method on a cart with the standard setPaymentMethodOnCart mutation
+# (code: "shamcash"); then read instructions and trigger a check with these.
+
+type Query {
+    shamCashPaymentInstructions(
+        order_number: String! @doc(description: "Increment id of the customer's order.")
+    ): ShamCashPaymentInstructions
+    @resolver(class: "ShamCash\\Payment\\Model\\Resolver\\PaymentInstructions")
+    @doc(description: "Sham Cash wallet, QR, amount and reference for a customer's order.")
+}
+
+type Mutation {
+    shamCashCheckPayment(
+        order_number: String! @doc(description: "Increment id of the customer's order.")
+    ): ShamCashReconciliationResult
+    @resolver(class: "ShamCash\\Payment\\Model\\Resolver\\CheckPayment")
+    @doc(description: "Ask the store to reconcile the order against Sham Cash transactions now.")
+}
+
+type ShamCashPaymentInstructions @doc(description: "What the shopper needs to complete a Sham Cash transfer.") {
+    reference: String! @doc(description: "Order reference to include in the transfer note.")
+    amount: String! @doc(description: "Amount to transfer.")
+    currency: String! @doc(description: "Currency code of the amount.")
+    wallet_address: String! @doc(description: "Merchant Sham Cash wallet to transfer to.")
+    qr_payload: String! @doc(description: "QR payload to scan/paste in the Sham Cash app.")
+    status: String! @doc(description: "Payment status: pending or paid.")
+    instructions: String! @doc(description: "Human-readable instructions text.")
+}
+
+type ShamCashReconciliationResult @doc(description: "Outcome of a reconciliation check.") {
+    status: String! @doc(description: "matched, pending, already_paid, subscription_unavailable or error.")
+    message: String! @doc(description: "Human-readable message.")
+    transaction_id: String @doc(description: "Matched Sham Cash transaction id, when matched.")
+}

@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * REST endpoints for Sham Cash. Admin-scoped (use an integration/admin token);
+ * customer-facing checks go through the Luma success page or GraphQL.
+ */
+-->
+<routes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Webapi:etc/webapi.xsd">
+    <route url="/V1/shamcash/orders/:orderId/instructions" method="GET">
+        <service class="ShamCash\Payment\Api\PaymentInstructionsInterface" method="getForOrder"/>
+        <resources>
+            <resource ref="ShamCash_Payment::reconcile"/>
+        </resources>
+    </route>
+    <route url="/V1/shamcash/orders/:orderId/check" method="POST">
+        <service class="ShamCash\Payment\Api\ReconciliationInterface" method="checkOrder"/>
+        <resources>
+            <resource ref="ShamCash_Payment::reconcile"/>
+        </resources>
+    </route>
+</routes>

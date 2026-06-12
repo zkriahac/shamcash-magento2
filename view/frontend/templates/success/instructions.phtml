@@ -1,0 +1,68 @@
+<?php
+/**
+ * @var \ShamCash\Payment\Block\Success\Instructions $block
+ * @var \Magento\Framework\Escaper $escaper
+ */
+if (!$block->isAvailable()) {
+    return;
+}
+$instructions = $block->getInstructions();
+?>
+<div class="shamcash-instructions" data-shamcash-check-url="<?= $escaper->escapeHtmlAttr($block->getCheckUrl()) ?>">
+    <div class="shamcash-instructions__header">
+        <h3><?= $escaper->escapeHtml(__('Complete your payment with Sham Cash')) ?></h3>
+    </div>
+
+    <?php if ($instructions->getInstructions() !== ''): ?>
+        <p class="shamcash-instructions__text"><?= $escaper->escapeHtml($instructions->getInstructions()) ?></p>
+    <?php endif; ?>
+
+    <ul class="shamcash-instructions__details">
+        <li>
+            <span class="label"><?= $escaper->escapeHtml(__('Amount')) ?>:</span>
+            <strong><?= $escaper->escapeHtml($instructions->getAmount()) ?>
+                <?= $escaper->escapeHtml($instructions->getCurrency()) ?></strong>
+        </li>
+        <?php if ($instructions->getWalletAddress() !== ''): ?>
+        <li>
+            <span class="label"><?= $escaper->escapeHtml(__('Sham Cash wallet')) ?>:</span>
+            <strong class="shamcash-copy" id="shamcash-wallet"><?= $escaper->escapeHtml($instructions->getWalletAddress()) ?></strong>
+        </li>
+        <?php endif; ?>
+        <li>
+            <span class="label"><?= $escaper->escapeHtml(__('Payment reference (put in the note)')) ?>:</span>
+            <strong class="shamcash-copy" id="shamcash-reference"><?= $escaper->escapeHtml($instructions->getReference()) ?></strong>
+        </li>
+    </ul>
+
+    <?php if ($instructions->getQrPayload() !== ''): ?>
+        <div class="shamcash-instructions__qr">
+            <span class="label"><?= $escaper->escapeHtml(__('Or scan / paste this QR payload in your Sham Cash app')) ?>:</span>
+            <code class="shamcash-qr-payload"><?= $escaper->escapeHtml($instructions->getQrPayload()) ?></code>
+        </div>
+    <?php endif; ?>
+
+    <div class="shamcash-instructions__status"
+         data-bind-paid="<?= $block->isPaid() ? '1' : '0' ?>">
+        <?php if ($block->isPaid()): ?>
+            <p class="message success"><?= $escaper->escapeHtml(__('Payment received — your order is confirmed.')) ?></p>
+        <?php else: ?>
+            <p class="message notice shamcash-pending-message">
+                <?= $escaper->escapeHtml(__('Waiting for your transfer. It is usually confirmed within a few minutes.')) ?>
+            </p>
+            <button type="button" class="action primary" id="shamcash-ive-paid">
+                <span><?= $escaper->escapeHtml(__("I've paid")) ?></span>
+            </button>
+        <?php endif; ?>
+    </div>
+</div>
+
+<script type="text/x-magento-init">
+{
+    ".shamcash-instructions": {
+        "ShamCash_Payment/js/success-check": {
+            "checkUrl": "<?= $escaper->escapeJs($block->getCheckUrl()) ?>"
+        }
+    }
+}
+</script>
