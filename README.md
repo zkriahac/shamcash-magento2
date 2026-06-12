@@ -1,3 +1,5 @@
+**English** | [العربية](README.ar.md)
+
 # Sham Cash payment gateway for Magento 2
 
 Accept **Sham Cash** (شام كاش) e-wallet payments in Magento 2 Open Source / Adobe
