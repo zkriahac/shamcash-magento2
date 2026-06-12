@@ -1,38 +1,52 @@
+<div dir="rtl" align="right">
+
 [English](README.md) | **العربية**
 
 # بوابة دفع شام كاش لماجنتو 2
 
-اقبل مدفوعات محفظة **شام كاش** الإلكترونية في Magento 2 Open Source / Adobe
-Commerce **2.4.7+** عبر الواجهات الثلاث: **Luma** و**GraphQL** و**REST**.
+اقبل مدفوعات محفظة **شام كاش** الإلكترونية في Magento 2 Open Source و Adobe Commerce **2.4.7+** عبر واجهات **Luma** و **GraphQL** و **REST**.
 
-## كيف تعمل (اقرأ هذا أولاً)
+## كيف تعمل؟ (يرجى قراءة هذا القسم أولاً)
 
-واجهة شام كاش البرمجية العامة (`https://api.shamcash-api.com/v1`) هي **للقراءة
-فقط** — تتيح فقط `GET /accounts` و`GET /balances` و`GET /transactions` مع ترويسة
-`Authorization: Bearer <token>`. لا يوجد فيها **أي نقطة لبدء الدفع، ولا صفحة دفع
-مستضافة، ولا Webhook**.
+واجهة البرمجة العامة لشام كاش (`https://api.shamcash-api.com/v1`) مخصّصة **للقراءة فقط**، إذ توفر فقط:
 
-لذلك هذه الوحدة هي **بوابة مطابقة (تسوية)** وليست بوابة "خصم مباشر":
+* `GET /accounts`
+* `GET /balances`
+* `GET /transactions`
 
-1. عند إتمام الطلب يختار العميل **شام كاش**؛ يُسجَّل الطلب بحالة *بانتظار
-   الدفع* ويكون رقم الطلب هو المرجع.
-2. تعرض صفحة نجاح الطلب **عنوان محفظة** التاجر و**رمز QR** و**المبلغ/العملة**
-   و**المرجع الذي يجب كتابته في ملاحظة التحويل**.
-3. يحوّل العميل المبلغ من تطبيق شام كاش.
-4. تقرأ الوحدة `GET /transactions` لحساب التاجر، وعندما تجد التحويل الوارد
-   المطابق **تُصدر فاتورة الطلب تلقائياً**.
+باستخدام الترويسة:
 
-المطابقة تتم **بالملاحظة/المرجع أولاً** (ثم يُتحقق من المبلغ والعملة)، مع
-مطابقة احتياطية بالمبلغ والعملة ضمن نافذة زمنية. لا يمكن احتساب التحويل الواحد
-إلا لطلب واحد فقط (فهرس فريد على `transaction_id`). تعمل المطابقة من **كرون**،
-ومن زر **"لقد دفعت"** للعميل، ومن زر **"تحقق الآن"** للمدير، مع إمكانية
-**المطابقة اليدوية** من لوحة التحكم.
+```text
+Authorization: Bearer <token>
+```
+
+ولا توفر الواجهة أي نقطة نهاية لبدء الدفع، أو صفحة دفع مستضافة، أو Webhook.
+
+لذلك تعمل هذه الوحدة كبوابة **تحقق وتسوية للمدفوعات** وليست بوابة خصم مباشر.
+
+آلية العمل:
+
+1. عند إتمام الطلب يختار العميل **شام كاش** كطريقة دفع، ويُنشأ الطلب بحالة **بانتظار الدفع**، ويُستخدم رقم الطلب كمرجع للدفع.
+2. تعرض صفحة نجاح الطلب عنوان محفظة التاجر، ورمز QR، والمبلغ، والعملة، والمرجع المطلوب كتابته في ملاحظة التحويل.
+3. يقوم العميل بإرسال المبلغ من تطبيق شام كاش.
+4. تقوم الوحدة بقراءة التحويلات الواردة عبر `GET /transactions`، وعند العثور على تحويل مطابق تُنشئ فاتورة الطلب تلقائياً.
+
+تعتمد المطابقة على المرجع المكتوب في الملاحظة أولاً، ثم يتم التحقق من المبلغ والعملة. كما تتوفر مطابقة احتياطية تعتمد على المبلغ والعملة ضمن نافذة زمنية محددة.
+
+لا يمكن استخدام التحويل نفسه لأكثر من طلب واحد بفضل وجود فهرس فريد على `transaction_id`.
+
+يمكن تنفيذ المطابقة عبر:
+
+* مهمة مجدولة (Cron)
+* زر **لقد دفعت**
+* زر **تحقق الآن** في لوحة الإدارة
+* المطابقة اليدوية من لوحة التحكم
 
 ## التثبيت
 
-ثبّت الوحدة كحزمة Composer (مُوصى به). جذر المستودع *هو* الوحدة نفسها
-(`type: magento2-module`)، لذلك يضعها Composer تحت `vendor/` ويتعرّف عليها
-Magento عبر `registration.php` — لا يُنسخ أي شيء إلى `app/code`.
+يوصى بتثبيت الوحدة عبر Composer.
+
+جذر هذا المستودع هو الوحدة نفسها (`type: magento2-module`) ولذلك يقوم Composer بتثبيتها ضمن `vendor/` ويتعرف عليها Magento عبر `registration.php` دون الحاجة إلى نسخ ملفات داخل `app/code`.
 
 ```bash
 composer config repositories.shamcash-magento vcs https://github.com/zkriahac/shamcash-magento2.git
@@ -40,17 +54,26 @@ composer require shamcash/module-payment:dev-main
 
 bin/magento module:enable ShamCash_Payment
 bin/magento setup:upgrade
-bin/magento setup:di:compile        # وضع الإنتاج
+bin/magento setup:di:compile
 bin/magento cache:flush
 ```
 
-بعد نشر الحزمة على Packagist يمكن تخطي خطوة `composer config repositories`.
+بعد نشر الحزمة على Packagist يمكن تجاوز خطوة:
+
+```bash
+composer config repositories
+```
 
 <details>
-<summary>التثبيت اليدوي (app/code) — غير مُوصى به</summary>
+<summary>التثبيت اليدوي (غير موصى به)</summary>
 
-انسخ محتويات المستودع إلى `app/code/ShamCash/Payment/` ثم نفّذ أوامر
-`bin/magento` نفسها أعلاه.
+انسخ محتويات المستودع إلى:
+
+```text
+app/code/ShamCash/Payment/
+```
+
+ثم نفّذ أوامر Magento السابقة نفسها.
 
 </details>
 
@@ -58,101 +81,147 @@ bin/magento cache:flush
 
 **Stores → Configuration → Sales → Payment Methods → Sham Cash (شام كاش)**
 
-| الإعداد | ملاحظات |
-| --- | --- |
-| التفعيل / العنوان | إظهار طريقة الدفع عند إتمام الطلب. |
-| API Base URL | الافتراضي `https://api.shamcash-api.com/v1`. |
-| API Token | رمز Bearer من لوحة تحكم شام كاش. يُخزَّن مشفّراً. |
-| Account ID | الحساب المرتبط الذي يستقبل التحويلات. |
-| **تحديث بيانات الحساب** | يستدعي `/accounts` ويخزّن **عنوان** المحفظة و**رمز QR** والحالة. |
-| العملات المسموحة | الافتراضي `SYP,USD,TRY`. تُخفى الطريقة للعملات الأخرى. |
-| خريطة العملة → coin_id | فلتر اختياري لـ `/transactions`، مثل `SYP:1, USD:2, TRY:3`. |
-| وضع المطابقة | المرجع أولاً (افتراضي)، أو المرجع فقط، أو المبلغ فقط. |
-| سماحية المبلغ | السماحية المطلقة عند التحقق من المبلغ. |
-| مهلة النافذة الزمنية / أقصى عمر للطلب | نافذة البحث ومدة استمرار الكرون في فحص الطلب. |
-| جدولة كرون المطابقة | تعبير Crontab، الافتراضي `*/5 * * * *`. |
-| تعليمات إتمام الطلب | المتغيرات: `{amount}`, `{currency}`, `{address}`, `{reference}`. |
+| الإعداد                               | الوصف                                                        |
+| ------------------------------------- | ------------------------------------------------------------ |
+| التفعيل / العنوان                     | إظهار طريقة الدفع أثناء إتمام الطلب                          |
+| API Base URL                          | القيمة الافتراضية: `https://api.shamcash-api.com/v1`         |
+| API Token                             | رمز Bearer الخاص بالحساب، ويُخزن بشكل مشفر                   |
+| Account ID                            | الحساب الذي يستقبل التحويلات                                 |
+| تحديث بيانات الحساب                   | يجلب عنوان المحفظة ورمز QR والحالة من `/accounts`            |
+| العملات المسموحة                      | الافتراضي: `SYP,USD,TRY`                                     |
+| خريطة العملة → coin_id                | فلتر اختياري لـ `/transactions`                              |
+| وضع المطابقة                          | المرجع أولاً أو المرجع فقط أو المبلغ فقط                     |
+| سماحية المبلغ                         | هامش الخطأ المقبول عند مطابقة المبلغ                         |
+| مهلة النافذة الزمنية / أقصى عمر للطلب | مدة البحث عن المطابقة                                        |
+| جدولة كرون المطابقة                   | تعبير Crontab، الافتراضي `*/5 * * * *`                       |
+| تعليمات الدفع                         | يدعم `{amount}` و `{currency}` و `{address}` و `{reference}` |
 
-الرمز (Token) لا يغادر الخادم أبداً؛ واجهة المتجر لا ترى سوى عنوان المحفظة
-ورمز QR والمبلغ والمرجع.
+يبقى رمز الوصول داخل الخادم دائماً، ولا يتم إرساله إلى واجهة المتجر. يحصل العميل فقط على:
 
-## مطابقة حقول الواجهة البرمجية
+* عنوان المحفظة
+* رمز QR
+* المبلغ
+* المرجع
 
-| مفهوم الوحدة | حقل شام كاش |
-| --- | --- |
-| محفظة التاجر المعروضة للعميل | `account.address` |
-| رمز QR المعروض للعميل | `account.qr_payload` |
-| مرجع الدفع (في الملاحظة) | رقم الطلب ↔ `transaction.note` |
-| المبلغ / العملة المؤكدان | `transaction.amount` / `transaction.currency.code` |
-| معرّف العملية على الطلب | `transaction.transaction_id` |
+## ربط حقول الوحدة مع حقول API شام كاش
 
-رموز الأخطاء تُحوَّل إلى استثناءات مخصصة: `AUTH_*`/`FORBIDDEN` ←
-`AuthenticationException`، و`SUBSCRIPTION_UNAVAILABLE` ←
-`SubscriptionUnavailableException` (يوقف ذلك المتجر لهذه الجولة)،
-و`RATE_LIMIT_EXCEEDED` ← `RateLimitException` (يحترم `Retry-After`)،
-و`FETCH_FAILED` ← إعادة محاولة مع تباطؤ تدريجي.
+| داخل الوحدة                       | حقل شام كاش                                        |
+| --------------------------------- | -------------------------------------------------- |
+| عنوان محفظة التاجر المعروض للعميل | `account.address`                                  |
+| رمز QR المعروض للعميل             | `account.qr_payload`                               |
+| مرجع الدفع                        | رقم الطلب ↔ `transaction.note`                     |
+| المبلغ والعملة                    | `transaction.amount` / `transaction.currency.code` |
+| معرّف المعاملة                    | `transaction.transaction_id`                       |
+
+تُحوَّل رموز الأخطاء إلى استثناءات مخصّصة كما يلي:
+
+| الرمز                    | الاستثناء                        |
+| ------------------------ | -------------------------------- |
+| AUTH_* / FORBIDDEN       | AuthenticationException          |
+| SUBSCRIPTION_UNAVAILABLE | SubscriptionUnavailableException |
+| RATE_LIMIT_EXCEEDED      | RateLimitException               |
+| FETCH_FAILED             | إعادة المحاولة مع تباطؤ تدريجي   |
+
+عند ظهور `SUBSCRIPTION_UNAVAILABLE` يتم إيقاف معالجة الحساب مؤقتاً خلال دورة الفحص الحالية.
 
 ## GraphQL
 
-عيّن طريقة الدفع على السلة بالطفرة القياسية:
+عيّن طريقة الدفع على السلة باستخدام عملية التعديل القياسية:
 
 ```graphql
 mutation {
-  setPaymentMethodOnCart(input: { cart_id: "CART", payment_method: { code: "shamcash" } }) {
-    cart { selected_payment_method { code } }
+  setPaymentMethodOnCart(
+    input: {
+      cart_id: "CART"
+      payment_method: {
+        code: "shamcash"
+      }
+    }
+  ) {
+    cart {
+      selected_payment_method {
+        code
+      }
+    }
   }
 }
 ```
 
-ثم (لعميل مسجّل) اقرأ التعليمات وشغّل التحقق:
+ثم يمكن للعميل المسجل قراءة تعليمات الدفع والتحقق من حالة التحويل:
 
 ```graphql
 query {
   shamCashPaymentInstructions(order_number: "000000123") {
-    reference amount currency wallet_address qr_payload status instructions
+    reference
+    amount
+    currency
+    wallet_address
+    qr_payload
+    status
+    instructions
   }
 }
+```
 
+```graphql
 mutation {
   shamCashCheckPayment(order_number: "000000123") {
-    status message transaction_id
+    status
+    message
+    transaction_id
   }
 }
 ```
 
-## REST (رمز مدير / تكامل)
+## REST (للإدارة أو التكاملات)
+
+تعليمات الدفع لطلب محدد:
 
 ```bash
-# تعليمات الدفع لطلب معيّن
 curl -H "Authorization: Bearer <ADMIN_TOKEN>" \
-  "https://store.example/rest/V1/shamcash/orders/15/instructions"
-
-# مطابقة طلب الآن
-curl -X POST -H "Authorization: Bearer <ADMIN_TOKEN>" \
-  "https://store.example/rest/V1/shamcash/orders/15/check"
+"https://store.example/rest/V1/shamcash/orders/15/instructions"
 ```
 
-هذه النقاط تتطلب صلاحية ACL ‏`ShamCash_Payment::reconcile`. عمليات التحقق من
-جهة العميل تمر عبر صفحة النجاح في Luma أو عبر GraphQL.
+التحقق من الدفع الآن:
+
+```bash
+curl -X POST -H "Authorization: Bearer <ADMIN_TOKEN>" \
+"https://store.example/rest/V1/shamcash/orders/15/check"
+```
+
+تتطلب هذه النقاط صلاحية:
+
+```text
+ShamCash_Payment::reconcile
+```
+
+أما عمليات التحقق الخاصة بالعملاء فتتم عبر صفحة نجاح الطلب أو عبر GraphQL.
 
 ## الاختبارات
 
-الاختبارات الوحدوية الخفيفة (قواعد المطابقة، تحليل غلاف الاستجابة، DTOs،
-قراءة الإعدادات، إعادة المحاولة/التباطؤ) تعمل **دون تثبيت Magento كامل**:
+يمكن تشغيل الاختبارات الوحدوية دون الحاجة إلى تثبيت Magento بالكامل:
 
 ```bash
 mkdir -p .tools && ( cd .tools && composer require "phpunit/phpunit:^11" )
 ./.tools/vendor/bin/phpunit -c phpunit.xml.dist
 ```
 
-يشغّل CI المجموعة نفسها (`.github/workflows/unit-tests.yml`) على PHP 8.2
-و8.3.
+يقوم CI بتشغيل المجموعة نفسها على PHP 8.2 و PHP 8.3 عبر:
+
+```text
+.github/workflows/unit-tests.yml
+```
 
 ## ملاحظات وقيود
 
-- يتطلب **اشتراك شام كاش فعّالاً** على الحساب المرتبط؛ وإلا تعيد الواجهة
-  `SUBSCRIPTION_UNAVAILABLE` وتتوقف المطابقة مؤقتاً.
-- يُعرض رمز QR كنص قابل للنسخ؛ يمكنك عرضه كصورة في قالبك إن رغبت.
-- المشاريع الشقيقة: [WooCommerce](https://github.com/zkriahac/shamcash-woocommerce)
-  و[Shopify](https://github.com/zkriahac/shamcash-shopify). عميل `Gateway/`
-  مكتوب ليكون قابلاً للنقل بين المنصات.
+* يتطلب الحساب اشتراك شام كاش فعالاً.
+* عند انتهاء الاشتراك تُرجع الواجهة الرمز `SUBSCRIPTION_UNAVAILABLE` وتتوقف المطابقة مؤقتاً.
+* يتم عرض رمز QR كنص قابل للنسخ، ويمكن تحويله إلى صورة ضمن القالب إذا رغبت.
+* العميل البرمجي الموجود داخل `Gateway/` مصمم ليكون قابلاً لإعادة الاستخدام بين منصات متعددة.
+
+### مشاريع شقيقة
+
+* WooCommerce
+* Shopify
+
+</div>
